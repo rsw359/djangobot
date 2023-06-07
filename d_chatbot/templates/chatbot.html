@@ -1,0 +1,170 @@
+{% extends 'base.html' %} {% block styles %}
+<style>
+	body,
+	html {
+		height: 100%;
+	}
+
+	.messages-box {
+		flex: 1;
+		overflow-y: auto;
+	}
+
+	.messages-list {
+		padding-left: 0;
+	}
+
+	.message {
+		margin-bottom: 15px;
+		list-style: none;
+	}
+
+	.message-text {
+		padding: 10px;
+		border-radius: 5px;
+	}
+
+	.sent {
+		background-color: #dcf8c6;
+		align-self: flex-end;
+	}
+
+	.received {
+		background-color: #f1f0f0;
+		align-self: flex-start;
+	}
+
+	.message-form {
+		display: flex;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 10px;
+		background-color: #f8f9fa;
+	}
+
+	.message-input {
+		flex: 1;
+		border-radius: 0;
+		border-right: none;
+	}
+
+	.btn-send {
+		border-radius: 0;
+	}
+
+	.chat-container {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+</style>
+{% endblock %} {% block content %}
+<div class="chat-container">
+	<div class="card flex-grow-1">
+		<div class="card-header bg-primary text-white">Chat</div>
+		<div class="card-body messages-box">
+			<ul class="list-unstyled messages-list">
+				<li class="message received">
+					<div class="message-text">
+						<div class="message-sender">
+							<b>MinorTron</b>
+						</div>
+						<div class="message-content">
+							Hi, I am MinorTron. What is your query?
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<br /><br />
+		<br /><br />
+		<br /><br />
+	</div>
+	<form class="message-form">
+		{%csrf_token%}
+		<div class="input-group">
+			<input
+				type="text"
+				class="form-control message-input"
+				placeholder="Type your message..."
+			/>
+			<div class="input-group-append">
+				<button type="submit" class="btn btn-primary btn-send">Send</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+<script>
+	const messagesList = document.querySelector(".messages-list");
+	const messageForm = document.querySelector(".message-form");
+	const messageInput = document.querySelector(".message-input");
+
+	/* 
+		When the user submits the form, the message is sent to the server 
+		and added the message to the messages list.
+	*/
+	messageForm.addEventListener("submit", (event) => {
+		event.preventDefault();
+		const message = messageInput.value.trim();
+		if (message === "") {
+			return;
+		}
+
+		/* creates a new message element upon user input and adds it to the messages list */
+		const messageElmnt = document.createElement("li");
+		messageElmnt.classList.add(
+			"message",
+			"sent"
+		); /* adds the sent class to the message element */
+		messageElmnt.innerHTML = `
+			<div class= "message-text">
+					<div class="message-sender">
+						<b>You</b>
+					</div>
+					<div class="message-content">
+						${message}
+					</div>
+			</div>`;
+		messagesList.appendChild(
+			messageElmnt
+		); /* adds the message element to the messages list */
+		messageInput.value = ""; /* clears the message input field */
+
+		/* sends the message to the server */
+		fetch("", {
+			method: "POST",
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({
+				csrfmiddlewaretoken: document.querySelector(
+					'[name="csrfmiddlewaretoken"]'
+				).value,
+				message: message,
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				const response = data.response;
+				const messageElmnt = document.createElement("li");
+
+				/* add the received class to the message element */
+				messageElmnt.classList.add("message", "received");
+
+				/* add the chatbot response element to the messages list */
+				messageElmnt.innerHTML = `
+				<div class= "message-text">
+						<div class="message-sender">
+							<b>MinorTron</b>
+						</div>
+						<div class="message-content">
+							${response}
+						</div>
+				</div>`;
+				messagesList.appendChild(messageElmnt);
+			});
+	});
+</script>
+
+{% endblock %}
