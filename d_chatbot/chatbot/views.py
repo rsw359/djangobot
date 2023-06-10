@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from .config import API_KEY
 import openai
 
+from django.contrib import auth
 
 openai.api_key = API_KEY
 
@@ -28,3 +29,26 @@ def chatbot(request):
         response = ask_gpt3(message)
         return JsonResponse({"message": message, 'response': response})
     return render(request, 'chatbot.html')
+
+
+def login(request):
+    return render(request, 'login.html')
+
+
+def logout(request):
+    auth.logout(request)
+
+
+def register(request):
+
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
+        if password1 == password2:
+            pass
+        else:
+            error_message = 'Passwords do not match'
+            return render(request, 'register.html', {'error_message': error_message})
+    return render(request, 'register.html')
