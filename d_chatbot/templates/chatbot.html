@@ -64,6 +64,17 @@
 <div class="chat-container">
 	<div class="card flex-grow-1">
 		<div class="card-header bg-primary text-white">Chat</div>
+		{%if user.is_authenticated%}
+		<div class="card-header bg-primary text-white">
+			<b style="color: #f1f0f0">Welcome, {{user.username}}</b>
+			<a style="color: rgb(144, 8, 92)"logout">Logout</a>
+		</div>
+		{%else%}
+		<div class="card-header bg-primary text-white">
+			<a style="color: #f1f0f0" href="login">Login</a>
+			<a style="color: #f1f0f0" href="register">Register</a>
+		</div>
+		{%endif%}
 		<div class="card-body messages-box">
 			<ul class="list-unstyled messages-list">
 				<li class="message received">
@@ -72,7 +83,7 @@
 							<b>MinorTron</b>
 						</div>
 						<div class="message-content">
-							Hi, I am MinorTron. What is your query?
+							Hi, {{user.username}}. I am MinorTron. What is your query?
 						</div>
 					</div>
 				</li>

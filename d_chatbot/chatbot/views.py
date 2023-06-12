@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .config import API_KEY
 import openai
 
 from django.contrib import auth
+from django.contrib.auth.models import User
 
 openai.api_key = API_KEY
 
@@ -32,11 +33,24 @@ def chatbot(request):
 
 
 def login(request):
+    if request.method == 'POST':
+        usernames = request.POST['username']
+        password = request.POST['password']
+        user = auth.authenticate(
+            request, username=usernames, password=password)
+        if user is not None:
+            auth.login(request, user)
+            return redirect('chatbot')
+        else:
+            error_message = 'Invalid credentials'
+            return render(request, 'login.html', {'error_message': error_message})
+
     return render(request, 'login.html')
 
 
 def logout(request):
     auth.logout(request)
+    return redirect('login')
 
 
 def register(request):
@@ -47,7 +61,14 @@ def register(request):
         password1 = request.POST['password1']
         password2 = request.POST['password2']
         if password1 == password2:
-            pass
+            try:
+                user = User.objects.create_user(username, email, password1)
+                user.save()
+                auth.login(request, user)
+                return redirect('chatbot')
+            except:
+                error_message = "Error. Couldn't register"
+                return render(request, 'register.html', {'error_message': error_message})
         else:
             error_message = 'Passwords do not match'
             return render(request, 'register.html', {'error_message': error_message})
