@@ -11,26 +11,43 @@ from django.utils import timezone
 
 openai.api_key = API_KEY
 
+#Use with gpt-3 model
+# def ask_gpt3(message): 
+#     response = openai.Completion.create(
+#         model="text-davinci-003",
+#         prompt=message,
+#         max_tokens=150,
+#         n=1,
+#         stop=None,
+#         temperature=0.7,
+#     )
+#     print(response)
+#     # strips formatting from the response
+#     answer = response.choices[0].text.strip()
+#     return answer
 
-def ask_gpt3(message):
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=message,
-        max_tokens=150,
-        n=1,
-        stop=None,
-        temperature=0.7,
+#for use with gpt-4 chat completion model
+def ask_gpt4(message):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {'role': 'system', 'content':"you are a helpful assistant"},
+            {'role':'user', 'content': message}
+        ]
+
     )
     print(response)
-    # strips formatting from the response
-    answer = response.choices[0].text.strip()
+    # define the answer and strip formatting from the response
+    answer = response.choices[0].message.content.strip()
     return answer
 
 
 def chatbot(request):
+
+    chats = Chat.objects.filter(user=request.user).order_by('-created_at')[:10]
     if request.method == 'POST':
         message = request.POST.get('message')
-        response = ask_gpt3(message)
+        response = ask_gpt4(message)#change to ask_gpt3 if using the older model
 
         # save the message and response object to the database
         chat = Chat(user=request.user, message=message,
@@ -38,7 +55,7 @@ def chatbot(request):
         chat.save()
         return JsonResponse({"message": message, 'response': response})
 
-    return render(request, 'chatbot.html')
+    return render(request, 'chatbot.html', {'chats': chats})
 
 
 def login(request):
