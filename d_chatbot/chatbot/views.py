@@ -37,7 +37,7 @@ def ask_gpt4(message):
 
     )
     print(response)
-    # define the answer and strip formatting from the response
+    # define the answer and strips formatting from the response
     answer = response.choices[0].message.content.strip()
     return answer
 
