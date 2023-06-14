@@ -1,4 +1,4 @@
-# AI Chatbot with Django and SQLite
+# MinorTron: AI Chatbot with Django and SQLite
 
 This is an AI chatbot named MinorTron. It is built in Python using Django and SQLite. The chatbot utilizes the GPT-3.5-turbo model developed by OpenAI. The application allows users to log in and continue conversations, as the message history is saved to the database.
 
